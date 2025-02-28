@@ -1,0 +1,45 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+#mostrar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin: 10px;
+    flex: 1 1 calc(33.333% - 20px); /* 3 tarjetas por fila */
+    box-sizing: border-box;
+    text-align: center;
+    align-items: center;
+
+    img{
+        width: 50%;
+        margin-bottom: 2%;
+    }
+
+}
+
+.estilos_header{
+    border: 2px solid black !important;
+}
+
+.familia_texto{
+    font-family: TanPearl, sans-serif;
+}
+
+.agregar{
+    border-color: green;
+}
+
+#mostrar a{
+    color: black !important;
+}

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos FETCH</title>
+    <link rel="stylesheet" href="../assets/css/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .error{
+            border-color: red !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <label for="">Busca por ID:</label>
+    <input type="text" id="campo_texto" placeholder="ID">
+    <input type="button" id="enviar" value="Buscar ID">
+
+    <br><br>
+
+    <label for="">Buscar por categoria</label>
+    <select name="categoria" id="categoria">
+    </select>
+
+    <br><br>
+
+    <label for="">Buscar por el precio minimo y máximo:</label>
+    <input type="text" id="num_min" placeholder="Numero minimo">
+    <input type="text" id="num_max" placeholder="Numero máximo">
+    <input type="button" id="precio" value="Busca por precio">
+
+    <br><br>
+
+    <label for="">Buscar por Nombre o Descripcion:</label>
+    <input type="text" id="nombre_descripcion" placeholder="Nombre">
+    <input type="button" id="enviar_nombre" value="Buscar por nombre">
+
+    <br><br>
+
+    <form action="" class="enviar_formulario">
+        <h3>Formulario de Envio</h3>
+
+        <input type="text" id="id_producto" hidden>
+
+        <label for="">Nombre</label>
+        <input type="text" id="nombre">
+
+        <label for="">Descripcion</label>
+        <input type="text" id="descripcion">
+
+        <label for="">Imagen</label>
+        <input type="text" id="imagen">
+
+        <label for="">Precio</label>
+        <input type="text" id="precio_agregar">
+
+        <label for="">Categoria</label>
+        <select name="categoria_id" id="categoria_id">
+
+        </select>
+
+        <label for="">Stock</label>
+        <input type="text" id="stock">
+
+        <input type="button" id="enviar_formulario" value="Registrar">
+    </form>
+
+    <br><br>
+    <h2>PRODUCTOS</h2>
+    <h4 id="frase"></h4>
+    <div id="mostrar"></div>
+</body>
+<script>
+    const caja_mostrar = document.getElementById("mostrar");
+    const id_buscar = document.getElementById("campo_texto");
+    const btn_enviar = document.getElementById("enviar");
+    const categorias = document.getElementById("categoria");
+    const numero_minimo = document.getElementById("num_min");
+    const numero_maximo = document.getElementById("num_max");
+    const btn_enviar_precio = document.getElementById("precio");
+    const nombre_y_descripcion = document.getElementById("nombre_descripcion");
+    const btn_enviar_nombre = document.getElementById("enviar_nombre");
+    const mostrar_frase = document.getElementById("frase");
+
+    function pintar(elemento) {
+        const caja_crear = document.createElement("div");
+        const contenido = `<p>Nombre del Producto: ${elemento.nombre}</p>
+                            <img src="${elemento.imagen}"</img>
+                            <p>Descripcion: ${elemento.descripcion}</p>
+                            <p>Precio: ${elemento.precio}</p>
+                            <p>Categoria: ${elemento.categoria_id}</p>
+                            <p>ID: ${elemento.id}</p>
+                            <p>Stock: ${elemento.stock}</p>`;
+
+        caja_crear.classList.add("card");
+
+        caja_crear.innerHTML = contenido;
+
+        const btn_eliminar = document.createElement("button");
+        btn_eliminar.textContent = "Eliminar";
+        const btn_editar = document.createElement("button");
+        btn_editar.textContent = "Editar";
+
+        caja_crear.appendChild(btn_eliminar);
+        caja_crear.appendChild(btn_editar);
+
+        caja_mostrar.appendChild(caja_crear);
+
+        btn_editar.addEventListener("click", () => {
+            mostrarDatosEditar(elemento);
+        });
+
+        btn_eliminar.addEventListener("click", () => {
+            confirmarEliminar(elemento);
+        });
+
+    }
+
+    //-----------------------------CONSULTAR-----------------------------
+
+    function recojerProductos() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos", {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            datos.forEach(element => {
+                pintar(element);
+            });
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+
+    }
+
+    function buscarId(id) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos/" + id, {
+            method: "GET"
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            caja_mostrar.innerHTML = "";
+            console.log(datos);
+            pintar(datos);
+            mostrar_frase.textContent = "Productos con el: " + id;
+            id_buscar.value = "";
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function mostrarCategoria() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias", {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            datos.forEach(element => {
+                const crear = document.createElement("option");
+
+                const categoria_producto = element.id;
+                const nombre_producto = element.nombre;
+
+                crear.value = categoria_producto;
+                crear.textContent = nombre_producto;
+
+                categorias.appendChild(crear);
+            });
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function buscarPorCategoria() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos?categoria_id=" + categorias.value, {
+            method: "GET"
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            caja_mostrar.innerHTML = "";
+            datos.forEach(element => {
+                pintar(element);
+            });
+            console.log(datos);
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function buscarPorPrecio(precio_min, precio_max) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos?precio_min=" + precio_min + "&precio_max=" + precio_max + "", {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            caja_mostrar.innerHTML = "";
+            datos.forEach(element => {
+                pintar(element);
+            });
+
+            mostrar_frase.textContent = "Productos entre " + precio_min + " y " + precio_max;
+            numero_minimo.value = "";
+            numero_maximo.value = "";
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function buscarPorNombre(busqueda) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos?busqueda=" + busqueda, {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            caja_mostrar.innerHTML = "";
+            datos.forEach(element => {
+                pintar(element);
+            });
+            mostrar_frase.textContent = "Productos que contienen en el nombre o descripcion la palabra: " + busqueda;
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    //-----------------------------CREAR/ACTUALIZAR-----------------------------
+
+    const id_hidden = document.getElementById("id_producto");
+    const nombre_crear = document.getElementById("nombre");
+    const descripcion_crear = document.getElementById("descripcion");
+    const imagen_crear = document.getElementById("imagen");
+    const precio_crear = document.getElementById("precio_agregar");
+    const categoria_crear = document.getElementById("categoria_id");
+    const stock_crear = document.getElementById("stock");
+    const btn_enviar_crear = document.getElementById("enviar_formulario");
+
+    function crearProducto(nombre, descripcion, imagen, precio, categoria, stock) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos", {
+            method: "POST",
+            body: JSON.stringify({
+                "nombre": nombre,
+                "descripcion": descripcion,
+                "imagen": imagen,
+                "precio": precio,
+                "categoria_id": categoria,
+                "stock": stock,
+            }),
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            console.log(datos);
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function editarProducto(id, nombre, descripcion, imagen, precio, categoria, stock) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos/" + id, {
+            method: "PUT",
+            body: JSON.stringify({
+                "nombre": nombre,
+                "descripcion": descripcion,
+                "imagen": imagen,
+                "precio": precio,
+                "categoria_id": categoria,
+                "stock": stock,
+            }),
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            console.log(datos);
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function mostrarDatosEditar(elemento) {
+        id_hidden.value = elemento.id;
+        nombre_crear.value = elemento.nombre;
+        descripcion_crear.value = elemento.descripcion;
+        imagen_crear.value = elemento.imagen;
+        precio_crear.value = elemento.precio;
+        categoria_crear.value = elemento.categoria_id;
+        stock_crear.value = elemento.stock;
+    }
+
+    function vaciarCampos() {
+        id_hidden.value = "";
+        nombre_crear.value = "";
+        descripcion_crear.value = "";
+        imagen_crear.value = "";
+        precio_crear.value = "";
+        categoria_crear.value = "";
+        stock_crear.value = "";
+    }
+
+    function mostrarCategoriaEditar() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias", {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            datos.forEach(element => {
+                const crear = document.createElement("option");
+
+                const categoria_producto = element.id;
+                const nombre_producto = element.nombre;
+
+                crear.value = categoria_producto;
+                crear.textContent = nombre_producto;
+
+                categoria_crear.appendChild(crear);
+            });
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function eliminarProducto(id) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/productos/" + id, {
+            method: "DELETE",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            console.log(datos);
+        });
+    }
+
+    function confirmarEliminar(elemento) {
+        Swal.fire({
+            title: "¿Deseas eliminar el producto " + elemento.nombre + "?",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Eliminar",
+            denyButtonText: `No eliminar`
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                eliminarProducto(elemento.id);
+            } else if (result.isDenied) {
+                Swal.fire("No se eliminó", "", "info");
+            }
+        });
+    }
+
+    function validarDatos(){
+        let validar = true;
+
+        if(nombre_crear.value.trim()==""){
+            nombre_crear.classList.add("error");
+            validar = false;
+        }else{
+            nombre_crear.classList.remove("error");
+        }
+
+        if(descripcion_crear.value.trim()==""){
+            descripcion_crear.classList.add("error");
+            validar = false;
+        }else{
+            descripcion_crear.classList.remove("error");
+        }
+
+        if(imagen_crear.value.trim()==""){
+            imagen_crear.classList.add("error");
+            validar = false;
+        }else{
+            imagen_crear.classList.remove("error");
+        }
+
+        if(precio_crear.value.trim()==""){
+            precio_crear.classList.add("error");
+            validar = false;
+        }else{
+            precio_crear.classList.remove("error");
+        }
+
+        if(categoria_crear.value.trim()==""){
+            categoria_crear.classList.add("error");
+            validar = false;
+        }else{
+            categoria_crear.classList.remove("error");
+        }
+
+        if(stock_crear.value.trim()==""){
+            stock_crear.classList.add("error");
+            validar = false;
+        }else{
+            stock_crear.classList.remove("error");
+        }
+
+        return validar;
+    }
+
+    //-----------------------------SE EJECUTA AQUI-----------------------------
+
+    recojerProductos();
+
+    mostrarCategoria();
+
+    btn_enviar.addEventListener("click", () => {
+        buscarId(id_buscar.value);
+    });
+
+    categorias.addEventListener("change", () => {
+        buscarPorCategoria();
+    });
+
+    btn_enviar_precio.addEventListener("click", () => {
+        buscarPorPrecio(numero_minimo.value, numero_maximo.value);
+    });
+
+    btn_enviar_nombre.addEventListener("click", () => {
+        buscarPorNombre(nombre_y_descripcion.value);
+        nombre_y_descripcion.value = "";
+    });
+
+    btn_enviar_crear.addEventListener("click", () => {
+
+        if (id_hidden.value == 0) {
+            if(validarDatos()){
+                crearProducto(nombre_crear.value, descripcion_crear.value, imagen_crear.value, precio_crear.value, categoria_crear.value, stock_crear.value);
+                vaciarCampos();
+            }
+        } else {
+            if(validarDatos()){                
+                editarProducto(id_hidden.value, nombre_crear.value, descripcion_crear.value, imagen_crear.value, precio_crear.value, categoria_crear.value, stock_crear.value);
+                vaciarCampos();
+            }
+        }
+
+    });
+
+    mostrarCategoriaEditar();
+
+</script>
+
+</html>

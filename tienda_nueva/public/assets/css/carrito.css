@@ -1,0 +1,74 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Contenedor principal */
+.contenedor {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4; /* Fondo suave */
+    border-radius: 8px;
+    margin-bottom: 10%;
+    margin-top: 5%;
+}
+
+/* Estilo para la tabla */
+table.border {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff; /* Fondo blanco para la tabla */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+table.border td, table.border th {
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd; /* Línea sutil entre filas */
+}
+
+/* Encabezados de la tabla */
+table.border th {
+    background-color: #f9f9f9; /* Fondo claro para los encabezados */
+    color: #333;
+    font-weight: bold;
+}
+
+/* Estilo de los enlaces */
+a {
+    text-decoration: none;
+    color: #007BFF; /* Azul suave */
+    font-weight: bold;
+}
+
+a:hover{
+    color: black;
+}
+
+/* Estilo del mensaje si el carrito está vacío */
+.carrito-vacio {
+    text-align: center;
+    font-size: 18px;
+    color: #888;
+    margin-top: 20px;
+}
+
+/* Estilo del total y enlace de terminar compra */
+.total {
+    margin-top: 20px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.total a {
+    color: #28a745; /* Verde para el enlace de compra */
+}
+
+.total a:hover {
+    color: #218838;
+}
+

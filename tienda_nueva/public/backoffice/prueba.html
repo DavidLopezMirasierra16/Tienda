@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="">
+        <label for="">Correo</label>
+        <input type="text" name="correo" id="correo">
+
+        <label for="">Contraseña</label>
+        <input type="text" name="contraseña" id="contraseña">
+
+        <input type="submit" name="enviar" id="enviar">
+    </form>
+</body>
+<script>
+    const correo = document.getElementById("correo");
+    const contraseña = document.getElementById("contraseña");
+    const bnt_enviar = document.getElementById("enviar");
+
+    bnt_enviar.addEventListener("click", () => {
+        event.preventDefault();
+        let usuario = {
+            email: correo.value,
+            password: contraseña.value
+        }
+
+        fetch("http://localhost/Servidor/tienda_nueva/public/api/login_token.php", {
+            method: 'POST', //Método por el que lo enviamos
+            body: JSON.stringify(usuario), //Convertimos el JSON
+        }).then(response => {
+            return response.json(); //Procesamos la respuesta JSON
+        }).then(objeto_json => {
+            alert(objeto_json.token);
+            localStorage.setItem("Token", objeto_json.token);
+        });
+
+    });
+</script>
+</html>

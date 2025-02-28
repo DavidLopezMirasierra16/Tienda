@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+</head>
+<style>
+
+</style>
+
+<body>
+    <form action="">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre">
+
+        <label for="descripcion">Descripcion</label>
+        <input type="text" id="descripcion">
+
+        <input type="hidden" id="id_categoria">
+
+        <select name="categorias" id="categorias">
+            <option value="0">Selecciona un campo</option>
+        </select>
+
+        <input type="button" id="enviar" value="Enviar">
+        <input type="button" id="borrar" value="Eliminar">
+
+        <div id="ver"></div>
+    </form>
+</body>
+<script>
+    const nombre_input = document.getElementById("nombre");
+    const descripcion_input = document.getElementById("descripcion");
+    const id_oculto = document.getElementById("id_categoria");
+    const categorias = document.getElementById("categorias");
+    const mostar_datos = document.getElementById("ver");
+    const bnt_enviar = document.getElementById("enviar");
+    const btn_eliminar = document.getElementById("borrar");
+
+    function obtenerCategorias() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias", {
+            method: "GET",
+        }).then((response) => {
+            return response.json();
+        }).then((datos) => {
+            datos.forEach(opcion => {
+                const poner = document.createElement("option");
+
+                const id_opcion = opcion.id;
+                const nombre_opcion = opcion.nombre;
+
+                poner.value = id_opcion;
+                poner.textContent = nombre_opcion;
+
+                categorias.appendChild(poner);
+            });
+
+        }).catch((error) => {
+            console.error("Error" + error);
+        });
+    }
+
+    obtenerCategorias();
+
+    categorias.addEventListener("change", () => {
+        obtenerPorId();
+    });
+
+    function obtenerPorId() {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias/" + categorias.value, {
+            method: "GET",
+            mode: "cors"
+        }).then((response) => {
+            return response.json();
+        }).then((datos_productos) => {
+            console.log(datos_productos);
+            const nombre_datos = datos_productos.nombre;
+            const descripcion_datos = datos_productos.descripcion;
+            const id_datos = datos_productos.id;
+
+            //Mostramos los datos en los campos
+            id_oculto.value = id_datos;
+            nombre.value = nombre_datos;
+            descripcion.value = descripcion_datos;
+        }).catch((error) => {
+            console.error("Error" + error);
+        });
+    }
+
+    function crearObjeto(nombre_paso, descripcion_paso) {
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias", {
+            method: "POST",
+            body: JSON.stringify({
+                "nombre": nombre_paso,
+                "descripcion": descripcion_paso,
+            }),
+        }).then((response) => {
+            return response.json();
+        }).then((agregar) => {
+            let crear = document.createElement("option");
+            
+            crear.textContent=nombre_paso;
+            categorias.appendChild(crear);
+
+            if (agregar) {
+                console.log("Producto agregado con éxito");
+            }
+        }).catch((error) => {
+            console.log("Error" + error);
+        })
+    }
+
+    function editar(nombre_pasar, descripcion_pasar){
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias/" + categorias.value, {
+            method: "PUT",
+            body:JSON.stringify({
+                "nombre": nombre_pasar,
+                "descripcion": descripcion_pasar
+            }),
+        }).then((response)=>{
+            return response.json();
+        }).then((datos)=>{
+            if(datos){
+                console.log("Producto actualizado con exito");
+            }
+        }).catch((error)=>{
+            console.log("Error:"+error);
+        })
+    }
+
+    function eliminar(){
+        fetch("http://10.10.13.50/tienda/public/api/v1/api.php/categorias/" + categorias.value, {
+            method: "DELETE",
+        }).then((response)=>{
+            return response.json();
+        }).then((datos)=>{
+            if(datos){
+                console.log(categorias.value + " eliminado correctamente");
+            }
+        }).catch((error)=>{
+            console.log("Error"+error);
+        })
+    }
+
+    bnt_enviar.addEventListener("click", () => {
+        event.preventDefault();
+
+        if(id_oculto.value==0){
+            crearObjeto(nombre_input.value, descripcion_input.value);
+        }else{
+            editar(nombre_input.value, descripcion_input.value);
+        }
+    });
+
+    btn_eliminar.addEventListener("click", ()=>{
+        eliminar();
+    });
+
+</script>
+
+</html>
